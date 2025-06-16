@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "FluentNotes (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "FluentNotes (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
