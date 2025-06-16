@@ -24,6 +24,9 @@
 		<FileVersion>1.0.0.0</FileVersion>
 		<Version>1.0.0-beta</Version>
 	</PropertyGroup>
+	<ItemGroup>
+	  <None Remove="Views\Dialogs\OnboardingDialog.xaml" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<Content Include="Assets\SplashScreen.scale-200.png" />
@@ -52,6 +55,11 @@
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.6" />
 		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.4188" />
 		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250606001" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Page Update="Views\Dialogs\OnboardingDialog.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </Page>
 	</ItemGroup>
 
 	<!--

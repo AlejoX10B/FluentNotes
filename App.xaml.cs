@@ -21,10 +21,7 @@ namespace FluentNotes
             await _services.ConfigurationService.InitializeConfigsAsync();
             await _services.DirectoryService.InitializeDirectoriesAsync();
 
-            bool isFirstRun = await _services.ConfigurationService.IsFirstRunAsync();
-            System.Diagnostics.Debug.WriteLine($"Is First Run: {isFirstRun}");
-
-            _window = new MainWindow();
+            _window = new MainWindow(_services);
             _window.Activate();
         }
     }
