@@ -24,7 +24,7 @@ namespace FluentNotes.Services.Implementations.Configuration
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error obteniendo la configuración para la clave '{key}': {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error obteniendo la configuración para la clave '{key}': {ex.Message}");
             }
 
             return defaultValue;
@@ -38,7 +38,7 @@ namespace FluentNotes.Services.Implementations.Configuration
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error obteniendo la versión de la app: {key}': {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error obteniendo la versión de la app: {key}': {ex.Message}");
             }
         }
 
@@ -51,6 +51,7 @@ namespace FluentNotes.Services.Implementations.Configuration
                 return;
 
             await SetConfigAsync(ConfigKeys.IsFirstRun, true);
+            await SetConfigAsync(ConfigKeys.IsOnboardingCompleted, false);
             await SetConfigAsync(ConfigKeys.AppVersion, GetAppVersion());
         }
 
@@ -63,7 +64,7 @@ namespace FluentNotes.Services.Implementations.Configuration
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error obteniendo la versión de la app: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error obteniendo la versión de la app: {ex.Message}");
                 return "1.0.0";
             }
         }

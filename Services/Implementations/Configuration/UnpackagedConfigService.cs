@@ -29,11 +29,18 @@ namespace FluentNotes.Services.Implementations.Configuration
             try
             {
                 if (_configStore.TryGetValue(key, out var value))
-                    return (T)Convert.ChangeType(value, typeof(T));
+                {
+                    if (typeof(T).IsPrimitive || typeof(T) == typeof(string))
+                    {
+                        return (T)Convert.ChangeType(value, typeof(T));
+                    }
+
+                    return (T)value;
+                }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error obteniendo la configuración para la clave '{key}': {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error obteniendo la configuración para la clave '{key}': {ex.Message}");
             }
 
             return defaultValue;
@@ -48,7 +55,7 @@ namespace FluentNotes.Services.Implementations.Configuration
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error guardando la configuración para la clave '{key}': {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error guardando la configuración para la clave '{key}': {ex.Message}");
             }
         }
 
@@ -58,6 +65,7 @@ namespace FluentNotes.Services.Implementations.Configuration
                 return;
 
             await SetConfigAsync(ConfigKeys.IsFirstRun, true);
+            await SetConfigAsync(ConfigKeys.IsOnboardingCompleted, false);
             await SetConfigAsync(ConfigKeys.AppVersion, GetAppVersion());
 
             await SaveConfigsToFileAsync();
@@ -75,7 +83,7 @@ namespace FluentNotes.Services.Implementations.Configuration
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error obteniendo la versión de la app: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error obteniendo la versión de la app: {ex.Message}");
             }
 
             return "1.0.0.0";
@@ -91,7 +99,7 @@ namespace FluentNotes.Services.Implementations.Configuration
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error guardando la configuración en el archivo: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error guardando la configuración en el archivo: {ex.Message}");
                 throw new InvalidOperationException("No se pudo guardar la configuración", ex);
             }
         }
@@ -100,20 +108,40 @@ namespace FluentNotes.Services.Implementations.Configuration
         {
             try
             {
-                if (File.Exists(_configFilePath))
+                if (!File.Exists(_configFilePath))
                 {
-                    var json = File.ReadAllText(_configFilePath);
-                    _configStore = JsonSerializer.Deserialize<Dictionary<string, object>>(json)
-                                    ?? new Dictionary<string, object>();
+                    _configStore = new Dictionary<string, object>();
                 }
                 else
                 {
+                    var json = File.ReadAllText(_configFilePath);
+                    var rawConfigs = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json)
+                                    ?? new Dictionary<string, JsonElement>();
+
                     _configStore = new Dictionary<string, object>();
+                    foreach (var kvp in rawConfigs)
+                    {
+                        var element = kvp.Value;
+
+                        object value = element.ValueKind switch
+                        {
+                            JsonValueKind.True or JsonValueKind.False => element.GetBoolean(),
+                            JsonValueKind.Number => element.TryGetInt32(out int intVal) ? intVal :
+                                                    element.TryGetInt64(out long longVal) ? longVal :
+                                                    element.TryGetDouble(out double doubleVal) ? doubleVal :
+                                                    element.GetDecimal(),
+                            JsonValueKind.String when DateTime.TryParse(element.GetString(), out DateTime dateVal) => dateVal,
+                            JsonValueKind.String => element.GetString() ?? string.Empty,
+                            _ => element.ToString()
+                        };
+
+                        _configStore[kvp.Key] = value;
+                    }
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error cargando la configuración desde el archivo: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error cargando la configuración desde el archivo: {ex.Message}");
                 _configStore = new Dictionary<string, object>();
             }
 

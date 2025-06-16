@@ -20,14 +20,22 @@ namespace FluentNotes.Services.Implementations.Configuration
 
         public async Task InitializeDirectoriesAsync()
         {
-            var localFolder = ApplicationData.Current.LocalFolder;
+            try
+            {
+                var localFolder = ApplicationData.Current.LocalFolder;
 
-            var contentFolder = await localFolder.CreateFolderAsync(AppPaths.ContentFolder, CreationCollisionOption.OpenIfExists);
-            var notesFolder = await contentFolder.CreateFolderAsync(AppPaths.NotesFolder, CreationCollisionOption.OpenIfExists);
-            await contentFolder.CreateFolderAsync(AppPaths.OrphanedNotesFolder, CreationCollisionOption.OpenIfExists);
+                var contentFolder = await localFolder.CreateFolderAsync(AppPaths.ContentFolder, CreationCollisionOption.OpenIfExists);
+                var notesFolder = await contentFolder.CreateFolderAsync(AppPaths.NotesFolder, CreationCollisionOption.OpenIfExists);
+                await contentFolder.CreateFolderAsync(AppPaths.OrphanedNotesFolder, CreationCollisionOption.OpenIfExists);
 
-            await localFolder.CreateFolderAsync(AppPaths.BackupsFolder, CreationCollisionOption.OpenIfExists);
-            await localFolder.CreateFolderAsync(AppPaths.LogsFolder, CreationCollisionOption.OpenIfExists);
+                await localFolder.CreateFolderAsync(AppPaths.BackupsFolder, CreationCollisionOption.OpenIfExists);
+                await localFolder.CreateFolderAsync(AppPaths.LogsFolder, CreationCollisionOption.OpenIfExists);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error inicializando los directorios de la app: {ex.Message}");
+                throw;
+            }
         }
     }
 }
