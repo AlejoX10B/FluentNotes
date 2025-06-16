@@ -4,7 +4,7 @@ using System;
 using System.Threading.Tasks;
 using Windows.Storage;
 
-namespace FluentNotes.Services.Implementations
+namespace FluentNotes.Services.Implementations.Configuration
 {
     public class PackagedConfigService : IConfigurationService
     {
@@ -43,7 +43,7 @@ namespace FluentNotes.Services.Implementations
         }
 
         public async Task<bool> IsFirstRunAsync() =>
-            await GetConfigAsync<bool>(ConfigKeys.IsFirstRun, true);
+            await GetConfigAsync(ConfigKeys.IsFirstRun, true);
 
         public async Task InitializeConfigsAsync()
         {

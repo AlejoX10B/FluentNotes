@@ -6,14 +6,14 @@ using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace FluentNotes.Services.Implementations
+namespace FluentNotes.Services.Implementations.Configuration
 {
-    internal class UnpackagedConfigService : IConfigurationService
+    public class UnpackagedConfigService : IConfigurationService
     {
         private readonly string _configFilePath;
         private Dictionary<string, object> _configStore;
 
-        public UnpackagedConfigService(string appName = "FluentNotes")
+        public UnpackagedConfigService(string appName = AppPaths.AppName)
         {
             var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             var appDirectory = Path.Combine(appDataPath, appName);
@@ -64,7 +64,7 @@ namespace FluentNotes.Services.Implementations
         }
 
         public async Task<bool> IsFirstRunAsync() =>
-            await GetConfigAsync<bool>(ConfigKeys.IsFirstRun, true);
+            await GetConfigAsync(ConfigKeys.IsFirstRun, true);
 
         private string GetAppVersion()
         {
