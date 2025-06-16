@@ -25,6 +25,10 @@
 		<Version>1.0.0-beta</Version>
 	</PropertyGroup>
 	<ItemGroup>
+	  <Content Remove="Assets\Documents\Development Roadmap.md" />
+	  <Content Remove="Assets\Documents\Project Specification.md" />
+	</ItemGroup>
+	<ItemGroup>
 	  <None Remove="Views\Dialogs\OnboardingDialog.xaml" />
 	</ItemGroup>
 
