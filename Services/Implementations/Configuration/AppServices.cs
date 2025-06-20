@@ -6,5 +6,6 @@ namespace FluentNotes.Services.Implementations.Configuration
     {
         public IConfigurationService ConfigurationService { get; set; }
         public IDirectoryService DirectoryService { get; set; }
+        public IDatabaseService DatabaseService { get; set; }
     }
 }

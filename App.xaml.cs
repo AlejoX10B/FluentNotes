@@ -1,6 +1,6 @@
 ﻿using FluentNotes.Services.Implementations.Configuration;
-using FluentNotes.Services.Interfaces;
 using Microsoft.UI.Xaml;
+using System;
 
 namespace FluentNotes
 {
@@ -17,12 +17,21 @@ namespace FluentNotes
 
         protected override async void OnLaunched(LaunchActivatedEventArgs args)
         {
-            _services = AppServicesFactory.CreateServices();
-            await _services.ConfigurationService.InitializeConfigsAsync();
-            await _services.DirectoryService.InitializeDirectoriesAsync();
+            try
+            {
+                _services = AppServicesFactory.CreateServices();
+                await _services.ConfigurationService.InitializeConfigsAsync();
+                await _services.DirectoryService.InitializeDirectoriesAsync();
+                await _services.DatabaseService.InitializeDatabaseAsync();
 
-            _window = new MainWindow(_services);
-            _window.Activate();
+                _window = new MainWindow(_services);
+                _window.Activate();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error durante el inicio de la app: {ex.Message}");
+                throw;
+            }
         }
     }
 }

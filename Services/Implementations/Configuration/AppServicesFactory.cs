@@ -8,17 +8,27 @@ namespace FluentNotes.Services.Implementations.Configuration
     {
         public static AppServices CreateServices()
         {
+            IConfigurationService configurationService;
+            IDirectoryService directoryService;
+
             if (ApplicationTypeDetector.IsPackagedApp())
-                return new AppServices
-                {
-                    ConfigurationService = new PackagedConfigService(),
-                    DirectoryService = new PackagedDirectoryService()
-                };
-            
+            {
+                configurationService = new PackagedConfigService();
+                directoryService = new PackagedDirectoryService();
+            }
+            else
+            {
+                configurationService = new UnpackagedConfigService();
+                directoryService = new UnpackagedDirectoryService();
+            }
+
+            var databaseService = new DatabaseService(directoryService);
+
             return new AppServices
             {
-                ConfigurationService = new UnpackagedConfigService(),
-                DirectoryService = new UnpackagedDirectoryService()
+                ConfigurationService = configurationService,
+                DirectoryService = directoryService,
+                DatabaseService = databaseService
             };
         }
 
