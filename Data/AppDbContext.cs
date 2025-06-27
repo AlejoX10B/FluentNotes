@@ -2,9 +2,7 @@
 using FluentNotes.Utils.Converters;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -31,9 +29,9 @@ namespace FluentNotes.Data
                 options.CommandTimeout(30);
             });
 
-            #if DEBUG
+#if DEBUG
             optionsBuilder.EnableSensitiveDataLogging();
-            #endif
+#endif
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

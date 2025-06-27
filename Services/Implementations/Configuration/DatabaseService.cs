@@ -1,15 +1,17 @@
 ﻿using FluentNotes.Data;
 using FluentNotes.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using System;
 using System.IO;
 using System.Threading.Tasks;
 
 namespace FluentNotes.Services.Implementations.Configuration
 {
-    internal class DatabaseService : IDatabaseService
+    public class DatabaseService : IDatabaseService
     {
         private readonly IDirectoryService directoryService;
+        private readonly ILogger _logger = Log.ForContext<DatabaseService>();
         private string? _connectionString;
 
         public DatabaseService(IDirectoryService directoryService)
@@ -32,6 +34,8 @@ namespace FluentNotes.Services.Implementations.Configuration
         {
             try
             {
+                _logger.Information("Inicializando la base de datos");
+
                 using var context = await GetDbContextAsync();
 
                 await context.Database.EnsureCreatedAsync();
@@ -41,11 +45,11 @@ namespace FluentNotes.Services.Implementations.Configuration
                 await context.Database.ExecuteSqlRawAsync("PRAGMA cache_size=1000");
                 await context.Database.ExecuteSqlRawAsync("PRAGMA temp_store=MEMORY");
 
-                System.Diagnostics.Debug.WriteLine("Base de datos inicializada correctamente");
+                _logger.Information("Base de datos inicializada correctamente");
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error inicializando la base de datos: {ex.Message}");
+                _logger.Fatal(ex, "Error crítico inicializando la base de datos");
                 throw new InvalidOperationException("No se pudo inicializar la base de datos", ex);
             }
         }
@@ -59,7 +63,7 @@ namespace FluentNotes.Services.Implementations.Configuration
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error verificando la existencia de la base de datos: {ex.Message}");
+                _logger.Error(ex, "Error verificando la existencia de la base de datos");
                 return false;
             }
         }
@@ -77,7 +81,7 @@ namespace FluentNotes.Services.Implementations.Configuration
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error obteniendo la versión de la base de datos: {ex.Message}");
+                _logger.Error(ex, "Error obteniendo la versión de la base de datos");
                 return "Error";
             }
         }
@@ -86,6 +90,8 @@ namespace FluentNotes.Services.Implementations.Configuration
         {
             try
             {
+                _logger.Information("Iniciando backup en {BackupPath}", backupPath);
+
                 var path = await directoryService.GetDatabasePathAsync();
                 if (!File.Exists(path))
                     throw new FileNotFoundException("La base de datos no existe", path);
@@ -99,11 +105,11 @@ namespace FluentNotes.Services.Implementations.Configuration
 
                 File.Copy(path, backupPath, true);
 
-                System.Diagnostics.Debug.WriteLine($"Backup creado exitosamente en: {backupPath}");
+                _logger.Information("Backup creado exitosamente en: {BackupPath}", backupPath);
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error realizando el backup: {ex.Message}");
+                _logger.Error(ex, "Error realizando el backup en {BackupPath}", backupPath);
                 throw new InvalidOperationException("No se pudo realizar el backup", ex);
             }
         }
@@ -112,6 +118,8 @@ namespace FluentNotes.Services.Implementations.Configuration
         {
             try
             {
+                _logger.Information("Iniciando restauración desde {BackupPath}", backupPath);
+
                 if (!File.Exists(backupPath))
                     throw new FileNotFoundException("El archivo de backup no existe", backupPath);
 
@@ -127,12 +135,11 @@ namespace FluentNotes.Services.Implementations.Configuration
                                                 .SqlQueryRaw<int>("SELECT COUNT(*) FROM sqlite_master WHERE type='table'")
                                                 .FirstOrDefaultAsync();
 
-                System.Diagnostics.Debug.WriteLine($"Base de datos restaurada exitosamente desde: {backupPath}");
-
+                _logger.Information("Base de datos restaurada exitosamente desde: {BackupPath} con {TableCount} Tablas", backupPath, tableCount);
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error restaurando la base de datos: {ex.Message}");
+                _logger.Error(ex, "Error restaurando la base de datos");
                 throw new InvalidOperationException("No se pudo restaurar la base de datos", ex);
             }
         }
